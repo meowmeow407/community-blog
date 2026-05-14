@@ -1,14 +1,20 @@
-# Community Blog Platform
-A full-stack blog application built with **Vanilla JavaScript** and **MongoDB**.
+# 📝 Community Blog Platform
 
-## Features
-- **Mobile-First UI:** Built using CSS Grid and pure HTML/CSS.
-- **Rich Text Editing:** Custom editor for bold and italic text.
-- **Backend:** Node.js & Express server connected to MongoDB.
-- **Fast Search:** Indexed database for optimized query performance.
+A full-stack, mobile-first blog application built with **Vanilla JavaScript** and **MongoDB**. 
 
-## How to Run
-1. Clone the repo.
-2. Run `npm install`.
-3. Start the server with `node server.js`.
-4. Open `index.html` via Live Server.
+## 🚀 Features
+- **Mobile-First Design:** Responsive layout using CSS Grid.
+- **Rich-Text Editor:** Support for basic text formatting (Bold/Italic).
+- **No-Framework Frontend:** Built with pure Vanilla JS to demonstrate DOM manipulation skills.
+- **Robust Backend:** Node.js/Express server with MongoDB integration.
+
+## 🛠️ Tech Stack
+- **Frontend:** HTML5, CSS3, JavaScript (ES6)
+- **Backend:** Node.js, Express.js
+- **Database:** MongoDB (via Mongoose)
+
+## 🏁 How to Run Locally
+1. **Clone the repo:** `git clone https://github.com/meowmeow407/community-blog.git`
+2. **Install dependencies:** `npm install`
+3. **Start the server:** `node server.js`
+4. **View the site:** Open `index.html` in your browser.
