@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community Blog Platform</title>
+    <style>
+        /* --- CSS STYLES --- */
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Responsive Grid: Sidebar on desktop, Stacked on mobile */
+        @media (min-width: 850px) {
+            .container {
+                grid-template-columns: 380px 1fr;
+            }
+        }
+
+        /* Editor Styling */
+        #editor-container {
+            background: var(--card);
+            padding: 1.5rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            height: fit-content;
+            position: sticky;
+            top: 2rem;
+        }
+
+        h2 { margin-top: 0; font-size: 1.5rem; letter-spacing: -0.025em; }
+
+        input#title {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 5px;
+        }
+
+        .toolbar button {
+            width: auto;
+            padding: 5px 10px;
+            background: #e2e8f0;
+            color: var(--text-main);
+            font-size: 0.8rem;
+        }
+
+        #content-editor {
+            width: 100%;
+            min-height: 200px;
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background: #fff;
+            margin-bottom: 1.5rem;
+            outline: none;
+            overflow-y: auto;
+        }
+
+        #content-editor:empty:before {
+            content: "Write your story here...";
+            color: var(--text-muted);
+        }
+
+        .publish-btn {
+            width: 100%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .publish-btn:hover { background: var(--primary-dark); transform: translateY(-1px); }
+
+        /* Feed Styling */
+        #feed-container h2 { color: var(--text-main); }
+
+        .posts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .post-card {
+            background: var(--card);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease;
+        }
+
+        .post-card:hover { transform: scale(1.02); }
+
+        .post-card h3 { margin: 0 0 0.75rem 0; color: var(--primary); }
+
+        .post-card p { color: var(--text-muted); font-size: 0.95rem; }
+
+        .post-date {
+            display: block;
+            margin-top: 1rem;
+            font-size: 0.75rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <aside id="editor-container">
+        <h2>New Post</h2>
+        <input type="text" id="title" placeholder="Catchy Title">
+        
+        <div class="toolbar">
+            <button onclick="format('bold')"><b>B</b></button>
+            <button onclick="format('italic')"><i>I</i></button>
+        </div>
+        <div id="content-editor" contenteditable="true"></div>
+        
+        <button class="publish-btn" onclick="submitPost()">Publish to Feed</button>
+    </aside>
+
+    <main id="feed-container">
+        <h2>Community Feed</h2>
+        <div id="posts-grid" class="posts-grid">
+            </div>
+    </main>
+</div>
+
+<script>
+    /* --- JAVASCRIPT LOGIC --- */
+    const API_URL = 'http://localhost:5000/api/posts';
+
+    // Basic Rich Text Formatting
+    function format(command) {
+        document.execCommand(command, false, null);
+    }
+
+    // Fetch posts from MongoDB
+    async function loadPosts() {
+        try {
+            const res = await fetch(API_URL);
+            const posts = await res.json();
+            const grid = document.getElementById('posts-grid');
+            
+            grid.innerHTML = posts.map(post => `
+                <article class="post-card">
+                    <h3>${post.title}</h3>
+                    <div>${post.content}</div>
+                    <span class="post-date">${new Date(post.createdAt).toLocaleDateString()}</span>
+                </article>
+            `).join('');
+        } catch (err) {
+            console.error("Could not load posts. Is the server running?");
+        }
+    }
+
+    // Send post to MongoDB
+    async function submitPost() {
+        const titleInput = document.getElementById('title');
+        const contentInput = document.getElementById('content-editor');
+
+        const postData = {
+            title: titleInput.value,
+            content: contentInput.innerHTML // Use innerHTML to keep bold/italic tags
+        };
+
+        if(!postData.title || !postData.content) return alert("Fields cannot be empty!");
+
+        try {
+            await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(postData)
+            });
+
+            // Clear inputs and reload
+            titleInput.value = '';
+            contentInput.innerHTML = '';
+            loadPosts();
+        } catch (err) {
+            alert("Server Error: Check your terminal.");
+        }
+    }
+
+    // Initial Load
+    loadPosts();
+</script>
+
+</body>
+</html>
